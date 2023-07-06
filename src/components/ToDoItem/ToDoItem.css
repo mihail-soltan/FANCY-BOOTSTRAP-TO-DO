@@ -1,0 +1,16 @@
+
+.accordion {
+    margin: 1rem;
+}
+
+.accordion-button {
+  /* background-color: gray !important; */
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+}
+
+.accordion-button:not(.collapsed) {
+  color: #212529;
+}

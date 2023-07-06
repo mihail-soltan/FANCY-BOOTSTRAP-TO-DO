@@ -1,0 +1,11 @@
+.card-1,
+.card-2,
+.card-3 {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 250px;
+  height: 250px;
+  border: 2px solid black;
+}
