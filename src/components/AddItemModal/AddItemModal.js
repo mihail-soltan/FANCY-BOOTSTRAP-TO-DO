@@ -2,7 +2,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
-export function AddItemModal({ show, closeModal, categories }) {
+export function AddItemModal({ show, closeModal, addNewTask, categories, tasks }) {
 
     const [newTask, setNewTask] = useState({})
 
@@ -11,8 +11,16 @@ export function AddItemModal({ show, closeModal, categories }) {
         setNewTask((valoareaPrecedenta) => ({ ...valoareaPrecedenta, [name]: value }))
     }
 
+
+
     const onConfirmAddTask = () => {
         console.log(newTask)
+        newTask.created_at = new Date()
+        newTask.created_by = "Shrek"
+        newTask.id = Math.floor(Math.random() * 100000000)
+        newTask.deadline = new Date(newTask.deadline) 
+        addNewTask([...tasks, newTask])
+        closeModal()
     }
     return (
         <div
@@ -33,19 +41,19 @@ export function AddItemModal({ show, closeModal, categories }) {
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                             <Form.Label>Description</Form.Label>
-                            <Form.Control as="textarea" rows={3} name="description" onChange={handleChange}/>
+                            <Form.Control as="textarea" rows={3} name="description" onChange={handleChange} />
                         </Form.Group>
-                        <Form.Select aria-label="Default select example">
+                        <Form.Select onChange={handleChange} name="category" aria-label="Default select example">
                             <option>Select Category</option>
                             {
                                 categories.map((category) =>
-                                    <option value={category}>{category}</option>
+                                    <option key={Math.floor(Math.random()*100000)} value={category}>{category}</option>
                                 )
                             }
                         </Form.Select>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Deadline</Form.Label>
-                            <Form.Control type="date" />
+                            <Form.Control onChange={handleChange} name="deadline" type="date" />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
