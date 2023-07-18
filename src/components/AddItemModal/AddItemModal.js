@@ -2,7 +2,9 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
-export function AddItemModal({ show, closeModal, addNewTask, categories, tasks }) {
+import { addNewTask } from '../../services/task.service';
+
+export function AddItemModal({ show, closeModal, categories, tasks, addTask }) {
 
     const [newTask, setNewTask] = useState({})
 
@@ -14,14 +16,16 @@ export function AddItemModal({ show, closeModal, addNewTask, categories, tasks }
 
 
     const onConfirmAddTask = () => {
-        console.log(newTask)
+        const username = localStorage.getItem("username")
         newTask.created_at = new Date()
-        newTask.created_by = "Shrek"
-        newTask.id = Math.floor(Math.random() * 100000000)
-        newTask.deadline = new Date(newTask.deadline) 
-        addNewTask([...tasks, newTask])
+        newTask.created_by = username ? username : "some random person"
+        newTask.completed = false
+        newTask.deadline = new Date(newTask.deadline)
+        addTask(newTask)
         closeModal()
     }
+
+
     return (
         <div
             className="modal show"
@@ -46,8 +50,8 @@ export function AddItemModal({ show, closeModal, addNewTask, categories, tasks }
                         <Form.Select onChange={handleChange} name="category" aria-label="Default select example">
                             <option>Select Category</option>
                             {
-                                categories.map((category) =>
-                                    <option key={Math.floor(Math.random()*100000)} value={category}>{category}</option>
+                                categories.map((category, index) =>
+                                    <option key={index} value={category}>{category}</option>
                                 )
                             }
                         </Form.Select>

@@ -14,3 +14,21 @@
 .accordion-button:not(.collapsed) {
   color: #212529;
 }
+
+.to-do, .completed {
+  height: 2vh;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.completed {
+  background-color: #198754;
+}
+
+.to-do {
+  background-color: #ffc107;
+}
+
+.deadline-missed {
+  background-color: #dc3545 !important;
+}

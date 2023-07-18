@@ -3,15 +3,13 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
 
-export const DeleteItemModal = ({show, closeModal, task, tasks, setTasks, setShowDeleteToast}) =>{
+export const DeleteItemModal = ({show, closeModal, task, tasks, setTasks, setShowDeleteToast, handleDeleteTask}) =>{
 
 
-    const handleDeleteTask = (item) => {
-        console.log(`Deleting task with id ${item.id}`)
-        const updatedTasks = tasks.filter((task) => task.id !== item.id)
+    const onDeleteTask = (item) => {
+        handleDeleteTask(item._id)
         closeModal()
         setShowDeleteToast(true)
-        setTasks(updatedTasks)
     }
 
   return (
@@ -30,7 +28,7 @@ export const DeleteItemModal = ({show, closeModal, task, tasks, setTasks, setSho
 
                 <Modal.Footer>
                     <Button variant="outline-danger" onClick={closeModal}>No</Button>
-                    <Button variant="success" onClick={()=>{handleDeleteTask(task)}}>Yes, pls</Button>
+                    <Button variant="success" onClick={()=>{onDeleteTask(task)}}>Yes, pls</Button>
                 </Modal.Footer>
             </Modal>
         </div>)

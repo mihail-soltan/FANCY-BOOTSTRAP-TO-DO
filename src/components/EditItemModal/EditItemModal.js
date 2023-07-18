@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState, useEffect } from 'react';
 
-export const EditItemModal = ({ task, closeModal, show, categories, tasks, editTask, setTasks }) => {
+export const EditItemModal = ({ task, closeModal, show, categories, tasks, editCurrentTask, setTasks }) => {
 
     const [currentTask, setCurrentTask] = useState({})
     const handleChange = (e) => {
@@ -11,29 +11,21 @@ export const EditItemModal = ({ task, closeModal, show, categories, tasks, editT
         setCurrentTask((valoareaPrecedenta) => ({ ...valoareaPrecedenta, [name]: value }))
     }
 
-    const convertDate = (date) => {
-        if (!date) {
-            return ''
-        }
-        const deadline = date.getDate()
-        const month = date.getMonth() < 10 ? `0${date.getMonth()}` : date.getMonth()
-        const year = date.getFullYear()
-        const convertedDate = `${year}-${month}-${deadline}`
-        return convertedDate
-    }
+    // const convertDate = (date) => {
+    //     if (!date) {
+    //         return ''
+    //     }
+    //     const deadline = date.getDate()
+    //     const month = date.getMonth() < 10 ? `0${date.getMonth()}` : date.getMonth()
+    //     const year = date.getFullYear()
+    //     const convertedDate = `${year}-${month}-${deadline}`
+    //     return convertedDate
+    // }
 
-    const handleEditTask = (taskId, editedTask) => {
-        currentTask.created_at = new Date()
-        currentTask.created_by = "Shrek"
+    const handleEditTask = async (taskId, editedTask) => {
         currentTask.deadline = new Date(currentTask.deadline)
-        const updatedTasks = tasks.map((task)=> {
-            if(task.id === taskId){
-                return {...task, ...editedTask}
-            }
-            return task
-        })
-        console.log(updatedTasks)
-        setTasks(updatedTasks)
+        delete currentTask._id
+        editCurrentTask(editedTask, taskId)
         closeModal()
 
     }
@@ -80,7 +72,7 @@ export const EditItemModal = ({ task, closeModal, show, categories, tasks, editT
 
                 <Modal.Footer>
                     <Button variant="outline-danger" onClick={closeModal}>Close</Button>
-                    <Button variant="success" onClick={()=>{handleEditTask(task.id, currentTask)}}>Edit Task</Button>
+                    <Button variant="success" onClick={()=>{handleEditTask(task._id, currentTask)}}>Edit Task</Button>
                 </Modal.Footer>
             </Modal>
         </div>)
