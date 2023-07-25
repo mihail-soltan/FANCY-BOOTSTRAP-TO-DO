@@ -15,3 +15,7 @@ export function isToday(date) {
 
     return convertedToday=== converted
 }   
+
+export const passwordsMatch = (pass, repeatedPass) => {
+    return repeatedPass === pass
+} 

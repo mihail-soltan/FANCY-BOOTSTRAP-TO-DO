@@ -1,9 +1,7 @@
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import { useState } from 'react';
 
-export const DeleteItemModal = ({show, closeModal, task, tasks, setTasks, setShowDeleteToast, handleDeleteTask}) =>{
+export const DeleteItemModal = ({show, closeModal, task, setShowDeleteToast, handleDeleteTask}) =>{
 
 
     const onDeleteTask = (item) => {

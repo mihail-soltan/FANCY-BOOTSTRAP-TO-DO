@@ -58,8 +58,8 @@ export const EditItemModal = ({ task, closeModal, show, categories, tasks, editC
                         <Form.Select onChange={handleChange} name="category" aria-label="Default select example">
                             <option>Select Category</option>
                             {
-                                categories.map((category, index) =>
-                                    <option key={index} value={category}>{category}</option>
+                                categories.map((category) =>
+                                    <option key={category._id} value={category.name}>{category.name}</option>
                                 )
                             }
                         </Form.Select>

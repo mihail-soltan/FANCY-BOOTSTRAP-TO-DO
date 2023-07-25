@@ -36,11 +36,6 @@ export function ToDoItem({ task,
         setShowDeleteModal(false)
     }
 
-    const editTask = () => {
-        console.log("hello")
-    }
-
-
     const handleFinishTask = async (taskId) => {
         const response = handleFinishedTask(taskId)
         return response
