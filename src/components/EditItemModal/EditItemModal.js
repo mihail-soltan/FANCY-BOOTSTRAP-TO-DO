@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState, useEffect } from 'react';
 
-export const EditItemModal = ({ task, closeModal, show, categories, tasks, editCurrentTask, setTasks }) => {
+export const EditItemModal = ({ task, closeModal, show, categories, tasks, editCurrentTask, setTasks, user }) => {
 
     const [currentTask, setCurrentTask] = useState({})
     const handleChange = (e) => {
@@ -24,13 +24,14 @@ export const EditItemModal = ({ task, closeModal, show, categories, tasks, editC
 
     const handleEditTask = async (taskId, editedTask) => {
         currentTask.deadline = new Date(currentTask.deadline)
+        currentTask.updated_by = user._id
+        currentTask.updated_at = new Date()
         delete currentTask._id
         editCurrentTask(editedTask, taskId)
         closeModal()
-
     }
 
-
+  
     useEffect(() => {
         setCurrentTask(task)
     }, [task])

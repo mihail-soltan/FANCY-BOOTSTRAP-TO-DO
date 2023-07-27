@@ -28,9 +28,10 @@ export const Navigation = ({ setShow }) => {
         }
     }, [location])
     return (
+        // to="/tasks/all"
         <Navbar variant="dark">
             <Container>
-                <Navbar.Brand>Fancy Task Manager</Navbar.Brand>
+                <Link to='/tasks/all'>Fancy Task Manager</Link>
                 <Navbar.Toggle />
                 <Navbar.Collapse className="justify-content-end">
                     <Navbar.Text>

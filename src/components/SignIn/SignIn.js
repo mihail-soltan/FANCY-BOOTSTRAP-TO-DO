@@ -14,15 +14,17 @@ export function SignIn() {
 
     async function login() {
         const response = await signIn(payload)
+        console.log(response)
         if (rememberMe) {
             localStorage.setItem("rememberMe", rememberMe)
             localStorage.setItem("token", response.token);
+            localStorage.setItem("user", JSON.stringify(response.user))
         }
         if (!response.success) {
             alert(response.error)
             return;
         }
-        localStorage.setItem("username", response.username)
+        localStorage.setItem("username", response.user.username)
         navigate("/tasks/all")
         return response
     }

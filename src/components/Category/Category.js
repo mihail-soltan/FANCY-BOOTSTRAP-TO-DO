@@ -8,6 +8,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import { EditOrDeleteCategory } from '../EditOrDeleteCategory/EditOrDeleteCategory';
+import { getCategoriesByUser } from '../../services/category.service';
 
 export function Category() {
 
@@ -16,7 +17,8 @@ export function Category() {
     const [show, setShow] = useState(false)
 
     async function onGetCategories() {
-        const response = await getCategories()
+        const user = JSON.parse(localStorage.getItem("user"))
+        const response = await getCategoriesByUser(user._id)
         console.log(response)
         setCategories(response)
     }
@@ -25,8 +27,13 @@ export function Category() {
     }
 
     async function onAddCategory() {
-        const body = { name: newCategory }
+        const user = JSON.parse(localStorage.getItem("user"))
+        const body = { name: newCategory, created_by: user._id }
         const response = await addNewCategory(body)
+        setCategories([])
+        onGetCategories()
+        
+
         setNewCategory('')
         return response
     }

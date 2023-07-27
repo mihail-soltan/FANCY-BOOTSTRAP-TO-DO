@@ -1,12 +1,11 @@
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export function AddItemModal({ show, closeModal, categories, addTask }) {
+export function AddItemModal({ show, closeModal, categories, addTask, user }) {
 
     const [newTask, setNewTask] = useState({})
-
     const handleChange = (e) => {
         const { name, value } = e.target
         setNewTask((valoareaPrecedenta) => ({ ...valoareaPrecedenta, [name]: value }))
@@ -14,16 +13,14 @@ export function AddItemModal({ show, closeModal, categories, addTask }) {
 
 
 
-    const onConfirmAddTask = () => {
-        const username = localStorage.getItem("username")
+    const onConfirmAddTask = (userId) => {
         newTask.created_at = new Date()
-        newTask.created_by = username ? username : "some random person"
+        newTask.created_by = userId
         newTask.completed = false
         newTask.deadline = new Date(newTask.deadline)
         addTask(newTask)
         closeModal()
     }
-
 
     return (
         <div
@@ -49,7 +46,7 @@ export function AddItemModal({ show, closeModal, categories, addTask }) {
                         <Form.Select onChange={handleChange} name="category" aria-label="Default select example">
                             <option>Select Category</option>
                             {
-                                categories.map((category) =>
+                                categories.filter((cat)=> !cat.name.includes("all")).map((category) =>
                                     <option key={category._id} value={category.name}>{category.name}</option>
                                 )
                             }
@@ -63,7 +60,7 @@ export function AddItemModal({ show, closeModal, categories, addTask }) {
 
                 <Modal.Footer>
                     <Button variant="outline-danger" onClick={closeModal}>Close</Button>
-                    <Button variant="success" onClick={onConfirmAddTask}>Save changes</Button>
+                    <Button variant="success" onClick={() => onConfirmAddTask(user._id)}>Save changes</Button>
                 </Modal.Footer>
             </Modal>
         </div>

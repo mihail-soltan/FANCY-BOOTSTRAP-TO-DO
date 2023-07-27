@@ -5,12 +5,11 @@ import Button from 'react-bootstrap/Button';
 import { AddItemModal } from '../AddItemModal/AddItemModal';
 import DeleteToast from '../Toast/DeleteToast';
 import Form from 'react-bootstrap/Form';
-import { getTasks, addNewTask, editTask, toggleCompletedTask, deleteTask } from '../../services/task.service';
-import { getCategories } from '../../services/category.service';
+import { getTasks, addNewTask, editTask, toggleCompletedTask, deleteTask, getTasksByUser } from '../../services/task.service';
+import { getCategories, getCategoriesByUser } from '../../services/category.service';
 import Spinner from 'react-bootstrap/Spinner';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-
 
 export function ToDoList() {
     const [showModal, setShowModal] = useState(false)
@@ -20,16 +19,16 @@ export function ToDoList() {
 
     const [filter, setFilter] = useState("")
     const [sort, setSort] = useState("")
-
+    const [user, setUser] = useState({})
     const params = useParams()
 
     const onAddNewItem = () => {
         setShowModal(true)
     }
 
-    async function onGetCategories() {
-        const response = await getCategories()
-        setCategories(response)
+    async function onGetCategories(userId) {
+        const response = await getCategoriesByUser(userId)
+        setCategories([{ name: "all", _id: Math.floor(Math.random() * 1000000000) }, ...response])
     }
     const closeModal = () => {
         setShowModal(false)
@@ -71,41 +70,54 @@ export function ToDoList() {
 
     const addTask = async (body) => {
         const response = await addNewTask(body)
-        getAllTasks("all")
+        getUserTasks(user._id, params.category)
         return response
     }
 
     const editCurrentTask = async (body, taskId) => {
         const response = await editTask(body, taskId)
-        getAllTasks("all")
+        getUserTasks(user._id, params.category)
         return response
     }
 
     const handleFinishedTask = async (taskId) => {
         const response = await toggleCompletedTask(taskId)
-        getAllTasks("all")
+        getUserTasks(user._id, params.category)
         return response
     }
 
     const handleDeleteTask = async (taskId) => {
         const response = await deleteTask(taskId)
-        getAllTasks("all")
+        getUserTasks(user._id, params.category)
         return response
     }
 
+    const getUserTasks = async (userId, category) => {
+        setTasks([])
+        const response = await getTasksByUser(userId, category)
+        setTasks(response.data)
+    }
+
     useEffect(() => {
-        getAllTasks(params.category)
-        onGetCategories()
-        console.log(params)
+        const cachedUser = JSON.parse(localStorage.getItem("user"))
+        if (cachedUser) {
+
+            setUser(cachedUser)
+            // getAllTasks(params.category)
+            onGetCategories(cachedUser._id)
+            console.log(params)
+            getUserTasks(cachedUser._id, params.category)
+        }
+
     }, [params])
 
     return (<div className='to-do-list'>
         <h1 style={{ color: "#fff" }}>To Do List</h1>
         <div>
-        <Button className='mx-2' variant="outline-warning" onClick={onAddNewItem}>Add New Item</Button>
-        <Link className='mx-2'to="/categories">
-            <Button variant="outline-success" >Add New Category</Button>
-        </Link>
+            <Button className='mx-2' variant="outline-warning" onClick={onAddNewItem}>Add New Item</Button>
+            <Link className='mx-2' to="/categories">
+                <Button variant="outline-success" >Add New Category</Button>
+            </Link>
         </div>
         <AddItemModal
             show={showModal}
@@ -113,6 +125,7 @@ export function ToDoList() {
             categories={categories}
             tasks={tasks}
             addTask={addTask}
+            user={user}
         />
         <div className='flex'>
             {/* <Form.Select style={{ "margin": "1rem" }} aria-label="filter by category" onChange={handleFilterChange}>
@@ -146,6 +159,7 @@ export function ToDoList() {
                     setShowDeleteToast={setShowDeleteToast}
                     handleFinishedTask={handleFinishedTask}
                     handleDeleteTask={handleDeleteTask}
+                    user={user}
                 />
             )
             : <Spinner animation="border" role="status" variant="warning">

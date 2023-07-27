@@ -15,7 +15,8 @@ export function ToDoItem({ task,
     setShowDeleteToast,
     editCurrentTask,
     handleFinishedTask,
-    handleDeleteTask
+    handleDeleteTask,
+    user
 }) {
     const styles = {
         width: "50%"
@@ -51,6 +52,7 @@ export function ToDoItem({ task,
             editCurrentTask={editCurrentTask}
             tasks={tasks}
             setTasks={setTasks}
+            user={user}
         />
             <DeleteItemModal
                 show={showDeleteModal}

@@ -1,7 +1,6 @@
 import axios from 'axios';
 const API_URL = "https://fancy-to-do-backend-production.up.railway.app/tasks"
 
-
 export const getTasks = async (category) => {
     try {
         if (category === 'all') {
@@ -17,6 +16,30 @@ export const getTasks = async (category) => {
         throw new Error(`Failed to get tasks: ${err}`)
     }
 }
+
+export const getTasksByUser = async (userId, category) => {
+    try {
+        if(category==="all"){
+            const response = await axios.get(`${API_URL}/user/${userId}`)
+            return response
+        }
+        const response = await axios.get(`${API_URL}/user/${userId}/category/${category}`)
+        return response
+    }
+    catch (err) {
+        throw new Error(`Failed to get tasks by ${userId}: ${err}`)
+    }
+}
+
+// export const getUserTasksByCategory = async(userId, category) => {
+//     try {
+//         const response = await axios.get(`${API_URL}/user/${userId}/category/${category}`)
+//         return response
+//     }
+//     catch (err) {
+//         throw new Error(`Failed to get tasks by ${userId} with category ${category}: ${err}`)
+//     }
+// }
 
 
 export const addNewTask = async (body) => {
