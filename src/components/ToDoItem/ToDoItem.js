@@ -1,7 +1,7 @@
 import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import "./ToDoItem.css"
 import { EditItemModal } from '../EditItemModal/EditItemModal';
 import { DeleteItemModal } from '../DeleteItemModal/DeleteItemModal';
@@ -43,6 +43,10 @@ export function ToDoItem({ task,
     }
     const completed = task.completed ? 'completed' : 'to-do'
     const deadlineIsToday = isToday(task.deadline) ? 'deadline-missed' : ""
+
+    useEffect(()=>{
+        console.log(task)
+    },[])
     return (
         <>        <EditItemModal
             show={showEditModal}

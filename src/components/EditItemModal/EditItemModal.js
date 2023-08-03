@@ -23,8 +23,9 @@ export const EditItemModal = ({ task, closeModal, show, categories, tasks, editC
     // }
 
     const handleEditTask = async (taskId, editedTask) => {
+        console.log(task)
         currentTask.deadline = new Date(currentTask.deadline)
-        currentTask.updated_by = user._id
+        currentTask.updated_by = user._id || "Guest"
         currentTask.updated_at = new Date()
         delete currentTask._id
         editCurrentTask(editedTask, taskId)
