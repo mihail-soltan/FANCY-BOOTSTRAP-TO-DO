@@ -15,11 +15,11 @@ export function Category() {
     const [categories, setCategories] = useState([])
     const [newCategory, setNewCategory] = useState("")
     const [show, setShow] = useState(false)
+    const localCategories = JSON.parse(localStorage.getItem("localCategories"))
 
     async function onGetCategories() {
         const user = JSON.parse(localStorage.getItem("user"))
         const response = await getCategoriesByUser(user._id)
-        console.log(response)
         setCategories(response)
     }
     function handleChange(e) {
@@ -28,26 +28,39 @@ export function Category() {
 
     async function onAddCategory() {
         const user = JSON.parse(localStorage.getItem("user"))
-        const body = { name: newCategory, created_by: user._id }
-        const response = await addNewCategory(body)
-        setCategories([])
-        onGetCategories()
-        
-
-        setNewCategory('')
-        return response
+        const isGuest = eval(localStorage.getItem("isGuest"))
+        if (user) {
+            const body = { name: newCategory, created_by: user._id }
+            const response = await addNewCategory(body)
+            setCategories([])
+            onGetCategories()
+            setNewCategory('')
+            return response
+        }
+        if (isGuest) {
+            const body = { name: newCategory, created_by: 'Guest' }
+            setCategories((prev) => ([...prev, body]))
+            localCategories ?
+                localStorage.setItem("localCategories", JSON.stringify([...localCategories, body])) :
+                localStorage.setItem("localCategories", JSON.stringify([body]))
+            setNewCategory('')
+        }
     }
 
-    const alertClicked = () => {
-        alert('You clicked the third ListGroupItem');
-    };
-
-    function closeModal () {
+    function closeModal() {
         setShow(false)
     }
-    
+
     useEffect(() => {
-        onGetCategories()
+        const user = JSON.parse(localStorage.getItem("user"))
+        const isGuest = eval(localStorage.getItem("isGuest"))
+        if (user) {
+            onGetCategories()
+        }
+        if (isGuest) {
+            localCategories ?
+                setCategories(localCategories) : setCategories([])
+        }
     }, [])
 
 
@@ -70,8 +83,8 @@ export function Category() {
             <ListGroup defaultActiveKey="#link1">
                 {categories.length ? categories.map((category) =>
                     <>
-                        <EditOrDeleteCategory show={show} category={category} closeModal={closeModal}/>
-                        <ListGroup.Item action onClick={()=> setShow(true)} key={category._id}>
+                        <EditOrDeleteCategory show={show} category={category} closeModal={closeModal} />
+                        <ListGroup.Item action onClick={() => setShow(true)} key={category._id}>
                             {category.name}
                         </ListGroup.Item> </>) : <Spinner animation="border" role="status" variant="warning">
                     <span className="visually-hidden">Loading...</span>

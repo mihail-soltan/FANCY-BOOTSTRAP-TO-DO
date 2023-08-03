@@ -99,14 +99,24 @@ export function ToDoList() {
     }
 
     useEffect(() => {
+        //eval()
         const cachedUser = JSON.parse(localStorage.getItem("user"))
+        const isGuest = eval(localStorage.getItem("isGuest"))
+        const localTasks = JSON.parse(localStorage.getItem("localTasks"))
+        const localCategories = JSON.parse(localStorage.getItem("localCategories"))
+
         if (cachedUser) {
 
             setUser(cachedUser)
             // getAllTasks(params.category)
             onGetCategories(cachedUser._id)
-            console.log(params)
+
             getUserTasks(cachedUser._id, params.category)
+        }
+        if (isGuest) {
+            setCategories([{ name: "all", _id: Math.floor(Math.random() * 1000000000) }])
+            localTasks ? setTasks(localTasks) : setTasks([])
+            localCategories ? setCategories(localCategories) : setCategories([])
         }
 
     }, [params])
@@ -135,8 +145,8 @@ export function ToDoList() {
                 )}
             </Form.Select> */}
             {categories.length ? categories.map((category) =>
-                <Link className='w-100 m-3' to={`/tasks/${category.name}`}>
-                    <Button variant="outline-light" key={category._id}>{category.name}</Button></Link>) : <Spinner animation="border" role="status" variant="warning">
+                <Link key={category._id} className='w-100 m-3' to={`/tasks/${category.name}`}>
+                    <Button variant="outline-light">{category.name}</Button></Link>) : <Spinner animation="border" role="status" variant="warning">
                 <span className="visually-hidden">Loading...</span>
             </Spinner>}
 
