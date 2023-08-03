@@ -4,10 +4,12 @@ import Button from 'react-bootstrap/Button';
 import { logout } from '../../services/auth.service';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import './Navigation.css'
 
 export const Navigation = ({ setShow }) => {
     const username = localStorage.getItem('username')
     const token = localStorage.getItem("token")
+    const isGuest = localStorage.getItem("isGuest")
     const [welcomeMessage, setWelcomeMessage] = useState('')
     const [signedIn, setSignedIn] = useState(false)
     const location = useLocation()
@@ -22,9 +24,11 @@ export const Navigation = ({ setShow }) => {
             setWelcomeMessage(`Signed in as ${username}`)
             setSignedIn(true)
         }
+        else if (isGuest) {
+            setWelcomeMessage("Signed in as guest")
+        }
         else {
             setWelcomeMessage(`Please sign in`)
-            setSignedIn(false)
         }
     }, [location])
     return (
@@ -37,7 +41,8 @@ export const Navigation = ({ setShow }) => {
                     <Navbar.Text>
                         {signedIn && welcomeMessage}
                         {signedIn && <Button variant="link" onClick={onLogout}>Sign out</Button>}
-                        {!signedIn && <Link to="/signin">{welcomeMessage}</Link>}
+                        {!signedIn && !isGuest && <Link to="/signin">{welcomeMessage}</Link>}
+                        {isGuest && <div className='flex column'> {welcomeMessage} <Link to="/signup">Please sign up, if you'd like</Link> </div>}
                     </Navbar.Text>
                 </Navbar.Collapse>
             </Container>

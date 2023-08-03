@@ -16,19 +16,25 @@ export function ToDoList() {
     const [showDeleteToast, setShowDeleteToast] = useState(false)
     const [categories, setCategories] = useState([])
     const [tasks, setTasks] = useState([])
-
+    const [isLoading, setIsLoading] = useState(false)
     const [filter, setFilter] = useState("")
     const [sort, setSort] = useState("")
     const [user, setUser] = useState({})
     const params = useParams()
+    const cachedUser = JSON.parse(localStorage.getItem("user"))
+    const isGuest = eval(localStorage.getItem("isGuest"))
+    const localTasks = JSON.parse(localStorage.getItem("localTasks"))
+    const localCategories = JSON.parse(localStorage.getItem("localCategories"))
 
     const onAddNewItem = () => {
         setShowModal(true)
     }
 
     async function onGetCategories(userId) {
+        setIsLoading(true)
         const response = await getCategoriesByUser(userId)
         setCategories([{ name: "all", _id: Math.floor(Math.random() * 1000000000) }, ...response])
+        setIsLoading(false)
     }
     const closeModal = () => {
         setShowModal(false)
@@ -69,15 +75,41 @@ export function ToDoList() {
     }
 
     const addTask = async (body) => {
-        const response = await addNewTask(body)
-        getUserTasks(user._id, params.category)
-        return response
+        if (cachedUser) {
+            setIsLoading(true)
+            const response = await addNewTask(body)
+            getUserTasks(user._id, params.category)
+            setIsLoading(false)
+            return response
+        }
+        else {
+            setTasks((prev) => ([...prev, body]))
+            localStorage.setItem("localTasks", JSON.stringify([...tasks, body]))
+        }
     }
-
+    /*
+    
+    */
     const editCurrentTask = async (body, taskId) => {
-        const response = await editTask(body, taskId)
-        getUserTasks(user._id, params.category)
-        return response
+        console.log("BODY: ", body)
+        console.log("TASK ID: ", taskId)
+        if (cachedUser) {
+            const response = await editTask(body, taskId)
+            getUserTasks(user._id, params.category)
+            return response
+        }
+        else {
+            console.log(localTasks)
+            let currentTaskIndex = localTasks.findIndex((task) => task._id === taskId)
+            if (currentTaskIndex.toString()) {
+                localTasks[currentTaskIndex] = { _id: taskId, ...body }
+                console.log(localTasks)
+            }
+            setTasks(localTasks)
+
+            // console.log(currentTask)
+            localStorage.setItem("localTasks", JSON.stringify(localTasks))
+        }
     }
 
     const handleFinishedTask = async (taskId) => {
@@ -93,18 +125,14 @@ export function ToDoList() {
     }
 
     const getUserTasks = async (userId, category) => {
-        setTasks([])
+        // setTasks([])
+        setIsLoading(true)
         const response = await getTasksByUser(userId, category)
         setTasks(response.data)
+        setIsLoading(false)
     }
 
     useEffect(() => {
-        //eval()
-        const cachedUser = JSON.parse(localStorage.getItem("user"))
-        const isGuest = eval(localStorage.getItem("isGuest"))
-        const localTasks = JSON.parse(localStorage.getItem("localTasks"))
-        const localCategories = JSON.parse(localStorage.getItem("localCategories"))
-
         if (cachedUser) {
 
             setUser(cachedUser)
@@ -117,6 +145,11 @@ export function ToDoList() {
             setCategories([{ name: "all", _id: Math.floor(Math.random() * 1000000000) }])
             localTasks ? setTasks(localTasks) : setTasks([])
             localCategories ? setCategories(localCategories) : setCategories([])
+            if (params.category === "all") {
+                return
+            }
+            const filteredTasks = localTasks.filter((task) => task.category === params.category)
+            setTasks(filteredTasks)
         }
 
     }, [params])
@@ -144,7 +177,7 @@ export function ToDoList() {
                     <option key={index} value={cat}>{cat}</option>
                 )}
             </Form.Select> */}
-            {categories.length ? categories.map((category) =>
+            {!isLoading ? categories.map((category) =>
                 <Link key={category._id} className='w-100 m-3' to={`/tasks/${category.name}`}>
                     <Button variant="outline-light">{category.name}</Button></Link>) : <Spinner animation="border" role="status" variant="warning">
                 <span className="visually-hidden">Loading...</span>
@@ -156,7 +189,7 @@ export function ToDoList() {
                 <option value="desc">desc</option>
             </Form.Select>
         </div>
-        {tasks.length ?
+        {!isLoading ?
             sortedTasks.map((item) =>
                 <ToDoItem
                     key={item._id}

@@ -14,8 +14,14 @@ export function AddItemModal({ show, closeModal, categories, addTask, user }) {
 
 
     const onConfirmAddTask = (userId) => {
+        if (userId) {
+            newTask.created_by = userId
+        }
+        else {
+            newTask.created_by = "Guest";
+                newTask._id = Math.floor(Math.random() * 10000000000000)
+        }
         newTask.created_at = new Date()
-        newTask.created_by = userId
         newTask.completed = false
         newTask.deadline = new Date(newTask.deadline)
         addTask(newTask)
@@ -46,7 +52,7 @@ export function AddItemModal({ show, closeModal, categories, addTask, user }) {
                         <Form.Select onChange={handleChange} name="category" aria-label="Default select example">
                             <option>Select Category</option>
                             {
-                                categories.filter((cat)=> !cat.name.includes("all")).map((category) =>
+                                categories.filter((cat) => !cat.name.includes("all")).map((category) =>
                                     <option key={category._id} value={category.name}>{category.name}</option>
                                 )
                             }
