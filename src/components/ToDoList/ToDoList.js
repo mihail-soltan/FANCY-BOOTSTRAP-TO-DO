@@ -5,11 +5,20 @@ import Button from 'react-bootstrap/Button';
 import { AddItemModal } from '../AddItemModal/AddItemModal';
 import DeleteToast from '../Toast/DeleteToast';
 import Form from 'react-bootstrap/Form';
-import { getTasks, addNewTask, editTask, toggleCompletedTask, deleteTask, getTasksByUser } from '../../services/task.service';
+import {
+    getTasks,
+    addNewTask,
+    editTask,
+    toggleCompletedTask,
+    deleteTask,
+    getTasksByUser,
+    exportData,
+} from '../../services/task.service';
 import { getCategories, getCategoriesByUser } from '../../services/category.service';
 import Spinner from 'react-bootstrap/Spinner';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import { MaterialReactTable } from 'material-react-table';
 
 export function ToDoList() {
     const [showModal, setShowModal] = useState(false)
@@ -20,6 +29,7 @@ export function ToDoList() {
     const [filter, setFilter] = useState("")
     const [sort, setSort] = useState("")
     const [user, setUser] = useState({})
+    const [importedTasks, setImportedTasks] = useState([])
     const params = useParams()
     const cachedUser = JSON.parse(localStorage.getItem("user"))
     const isGuest = eval(localStorage.getItem("isGuest"))
@@ -87,9 +97,7 @@ export function ToDoList() {
             localStorage.setItem("localTasks", JSON.stringify([...tasks, body]))
         }
     }
-    /*
-    
-    */
+
     const editCurrentTask = async (body, taskId) => {
         console.log("BODY: ", body)
         console.log("TASK ID: ", taskId)
@@ -113,15 +121,31 @@ export function ToDoList() {
     }
 
     const handleFinishedTask = async (taskId) => {
-        const response = await toggleCompletedTask(taskId)
-        getUserTasks(user._id, params.category)
-        return response
+        if (cachedUser) {
+
+            const response = await toggleCompletedTask(taskId)
+            getUserTasks(user._id, params.category)
+            return response
+        } else {
+            let currentTaskIndex = localTasks.findIndex((task) => task._id === taskId)
+            let currentTask = localTasks.filter((t) => t._id === taskId)
+            localTasks[currentTaskIndex] = { ...currentTask[0], completed: true }
+            setTasks(localTasks)
+            localStorage.setItem("localTasks", JSON.stringify(localTasks))
+        }
     }
 
     const handleDeleteTask = async (taskId) => {
-        const response = await deleteTask(taskId)
-        getUserTasks(user._id, params.category)
-        return response
+        if (cachedUser) {
+            const response = await deleteTask(taskId)
+            getUserTasks(user._id, params.category)
+            return response
+        }
+        else {
+            let filteredTasks = localTasks.filter((task) => task._id !== taskId)
+            setTasks(filteredTasks)
+            localStorage.setItem("localTasks", JSON.stringify(filteredTasks))
+        }
     }
 
     const getUserTasks = async (userId, category) => {
@@ -132,7 +156,45 @@ export function ToDoList() {
         setIsLoading(false)
     }
 
+    const onFileUpload = (event) => {
+        const file = event.target.files[0]
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const jsonString = e.target.result
+                    const jsonObject = JSON.parse(jsonString)
+
+                    setImportedTasks(jsonObject)
+                } catch (err) {
+                    console.log(`Something went wrong: ${err}`)
+                }
+            }
+
+            reader.onerror = () => {
+                console.log(`Something went wrong:`)
+            }
+
+            reader.readAsText(file)
+        }
+        else {
+            console.log("No file selected")
+        }
+    }
+
+    async function addImportTasks() {
+        let userId = JSON.parse(localStorage.getItem("user"))._id;
+        importedTasks.forEach(async (element) => {
+            let body = { ...element, created_by: userId }
+            const { _id, ...newBody } = body
+            await addNewTask(newBody)
+        })
+        await getUserTasks(userId, params.category)
+    }
+
     useEffect(() => {
+        console.log(tasks)
         if (cachedUser) {
 
             setUser(cachedUser)
@@ -161,6 +223,9 @@ export function ToDoList() {
             <Link className='mx-2' to="/categories">
                 <Button variant="outline-success" >Add New Category</Button>
             </Link>
+            <Button className='mx-2' variant="outline-info" onClick={() => exportData(localTasks, "tasks")}>Export Tasks</Button>
+            <Button className='mx-2' variant="light" onClick={addImportTasks}>Import Tasks</Button>
+            <Form.Control className='mx-2' type="file" onChange={onFileUpload} />
         </div>
         <AddItemModal
             show={showModal}

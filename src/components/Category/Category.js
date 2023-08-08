@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
-import { getCategories, addNewCategory } from '../../services/category.service'
+import { getCategories, addNewCategory, getCategoriesByUser } from '../../services/category.service'
 import './Category.css'
 import InputGroup from 'react-bootstrap/InputGroup';
 import ListGroup from 'react-bootstrap/ListGroup';
-
+import { exportData } from '../../services/task.service';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import { EditOrDeleteCategory } from '../EditOrDeleteCategory/EditOrDeleteCategory';
-import { getCategoriesByUser } from '../../services/category.service';
 
 export function Category() {
 
     const [categories, setCategories] = useState([])
     const [newCategory, setNewCategory] = useState("")
     const [show, setShow] = useState(false)
+    const [importedCategories, setImportedCategories] = useState([])
     const localCategories = JSON.parse(localStorage.getItem("localCategories"))
 
     async function onGetCategories() {
@@ -50,7 +50,42 @@ export function Category() {
     function closeModal() {
         setShow(false)
     }
+    //JSON.parse(localStorage.getItem("user"))
 
+    async function addImportedCategories() {
+        let userId = JSON.parse(localStorage.getItem("user"))._id
+        importedCategories.forEach(async (element) => {
+            const body = { name: element.name, created_by: userId }
+            const response = await addNewCategory(body)
+            return response
+        })
+    }
+    const onFileUpload = (event) => {
+        const file = event.target.files[0]
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const jsonString = e.target.result
+                    const jsonObject = JSON.parse(jsonString)
+
+                    setImportedCategories(jsonObject)
+                } catch (err) {
+                    console.log(`Something went wrong: ${err}`)
+                }
+            }
+
+            reader.onerror = () => {
+                console.log(`Something went wrong:`)
+            }
+
+            reader.readAsText(file)
+        }
+        else {
+            console.log("No file selected")
+        }
+    }
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"))
         const isGuest = eval(localStorage.getItem("isGuest"))
@@ -78,6 +113,9 @@ export function Category() {
                     value={newCategory}
                 />
                 <Button onClick={onAddCategory} variant="success">Add</Button>{' '}
+                <Button onClick={() => exportData(localCategories, "localCategories")} variant="outline-info">Export Categories</Button>
+                <Button onClick={addImportedCategories} variant="outline-info">Add Imported Categories</Button>
+                <Form.Control className='mx-2' type="file" onChange={onFileUpload} />
             </InputGroup>
             {/* categories.length? fa asta : fa altceva */}
             <ListGroup defaultActiveKey="#link1">

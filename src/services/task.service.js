@@ -19,7 +19,7 @@ export const getTasks = async (category) => {
 
 export const getTasksByUser = async (userId, category) => {
     try {
-        if(category==="all"){
+        if (category === "all") {
             const response = await axios.get(`${API_URL}/user/${userId}`)
             return response
         }
@@ -83,3 +83,14 @@ export const deleteTask = async (taskId) => {
         throw new Error(`Failed to delete task: ${err}`)
     }
 }
+
+export const exportData = (data, fileName) => {
+    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+        JSON.stringify(data)
+    )}`
+    const link = document.createElement("a")
+    link.href = jsonString;
+    link.download = `${fileName}.json`
+    link.click()
+}
+
